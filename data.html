@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -8,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Biodata Developer - Premium Dark</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&amp;display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       // Security Script
         document.addEventListener("contextmenu", e => e.preventDefault());
@@ -46,6 +48,7 @@
             }, 1000);
         }
     </script>
+    
     <style>
       :root {
             --bg-gradient: radial-gradient(circle at center, #2c2c2c 0%, #050505 100%);
@@ -335,6 +338,54 @@
   }
   .like-btn:active { transform: scale(0.9); }
   .like-btn.liked { background: #444; pointer-events: none; opacity: 0.8; }
+  #rating-display-container {
+    max-height: 450px; /* Batas tinggi box testimoni */
+    overflow-y: auto;  /* Munculkan scroll jika konten lebih tinggi dari 450px */
+    padding-right: 10px;
+    margin-top: 15px;
+}
+
+/* Mempercantik tampilan scrollbar */
+#rating-display-container::-webkit-scrollbar {
+    width: 5px;
+}
+#rating-display-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+#rating-display-container::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+.sub-title-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.sub-title {
+  margin: 0; /* Menghilangkan margin bawaan agar sejajar tombol */
+}
+
+.btn-video-main {
+  font-size: 0.6em;
+  color: #00d2ff;
+  text-decoration: none;
+  border: 1px solid #00d2ff;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: 0.3s;
+  background: rgba(0, 210, 255, 0.05);
+}
+
+.btn-video-main:hover {
+  background: #00d2ff;
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+}
     </style>
   </head>
   <body>
@@ -353,7 +404,7 @@
           <div class="stat-box">❤️ <span id="like-count">0</span></div>
         </div>
 
-        <button class="like-btn" id="btn-like">Like</button>
+        <button class="like-btn" id="btn-like">LIKE DISINI</button>
         <div class="developer-info">
           <h2>Informasi Dasar</h2>
           <div class="info-item"><strong>Nama Lengkap</strong><span>Achmad Furqon Aditya Putra</span></div>
@@ -390,26 +441,36 @@
     Browser Anda tidak mendukung video.
   </video>
 </div>
+<h2>Testimoni & Rating</h2>
+<div id="rating-display-container" style="max-height: 400px; overflow-y: auto;">
+  <p style="text-align: center; color: var(--text-muted);">Memuat pesan...</p>
+</div>
+<a href="rating.html" class="back-button" style="display: block; text-align: center; margin-top: 20px;">Isi Rating & Pesan</a>
 
 
           <h2>Organisasi &amp; Pengalaman</h2>
-          <span class="sub-title">Jabatan Organisasi Aktif</span>
-          <ul>
-            <li>Vice President CLUB WIRAUSAHA UNUJA</li>
-            <li>HEAD OF DEPARTMENT BEM Fakultas Teknik</li>
-            <li>Speaker PMB UNUJA</li>
-            <li>KWH PPI</li>
-            <li>Cadreization HIMATIKA</li>
-            <li>Media Creative GYN</li>
-          </ul>
-          
-          <span class="sub-title">Pengalaman Organisasi</span>
-          <ul>
-            <li>Ketua Angkatan Paskibraka (2023)</li>
-            <li>Bidang Kepelatihan Kompas Matura (2023)</li>
-            <li>Volunteer Senyum Anak Nusantara (2025)</li>
-            <li>Networking CLUB WIRAUSAHA UNUJA (2024)</li>
-          </ul>
+
+<div class="sub-title-wrapper">
+  <span class="sub-title">Jabatan Organisasi Aktif</span>
+  <a href="https://www.instagram.com/reel/DR8mRrCkdpy/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" target="_blank" class="btn-video-main">Lihat Video</a>
+</div>
+
+<ul>
+  <li>Vice President CLUB WIRAUSAHA UNUJA</li>
+  <li>HEAD OF DEPARTMENT BEM Fakultas Teknik</li>
+  <li>Speaker PMB UNUJA</li>
+  <li>KWH PPI</li>
+  <li>Cadreization HIMATIKA</li>
+  <li>Media Creative GYN</li>
+</ul>
+
+<span class="sub-title">Pengalaman Organisasi</span>
+<ul>
+  <li>Ketua Angkatan Paskibraka (2023)</li>
+  <li>Bidang Kepelatihan Kompas Matura (2023)</li>
+  <li>Volunteer Senyum Anak Nusantara (2025)</li>
+  <li>Networking CLUB WIRAUSAHA UNUJA (2024)</li>
+</ul>
 
           <h2>Proyek Digital</h2>
           <ul>
@@ -423,10 +484,10 @@
     </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, runTransaction, push, serverTimestamp, onValue } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { 
+    getDatabase, ref, runTransaction, onValue, query, limitToLast 
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // Konfigurasi Project
   const firebaseConfig = {
     apiKey: "AIzaSyBcQuP2GFUgljflnmhRZEKtB4R8Zr9ye6Y",
     authDomain: "cwu-ii-3ae88.firebaseapp.com",
@@ -438,84 +499,133 @@
     measurementId: "G-VMF1P71R5Z"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Ambil Nama dari URL
+  const countEl = document.getElementById("count");
+  const likeEl = document.getElementById("like-count");
+  const displayContainer = document.getElementById('rating-display-container');
+  const btnLike = document.getElementById('btn-like');
+
   const params = new URLSearchParams(window.location.search);
   const namaUser = params.get('user') || "Tamu_Anonymous";
 
-  // Definisi Path Database
+  // --- LOGIKA STATS & SURPRISE ---
   const statsRef = ref(db, 'stats/total_views');
-  const likesRef = ref(db, 'stats/total_likes');
-  const logsRef = ref(db, 'developer_clicks');
+  
+  runTransaction(statsRef, (curr) => (curr || 0) + 1).then((result) => {
+    const totalViews = result.snapshot.val();
+    countEl.innerText = totalViews;
 
-  // --- LOGIC UTAMA ---
+    const luckyNumbers = [1, 10, 50, 100, 200, 300, 400, 500];
 
-  // 1. INFO SELAMAT DATANG (Muncul setiap kali buka)
-  window.onload = () => {
-    alert("Selamat datang, jangan lupa like yaa!");
-  };
-
-  // 2. Auto View Counter dengan Fitur Surprise (Angka Spesifik)
-  runTransaction(statsRef, (currentValue) => {
-    return (currentValue || 0) + 1;
-  }).then((result) => {
-    if (result.committed) {
-      const newViewCount = result.snapshot.val();
-      
-      // Daftar angka target untuk surprise tambahan
-      const targets = [1, 10, 50, 100];
-      
-      if (targets.includes(newViewCount)) {
-        setTimeout(() => {
-          alert(`🎁 SURPRISE!\nAnda adalah pengunjung ke-${newViewCount}!\nTerima kasih dukungannya!`);
-        }, 800);
-      }
-    }
-  });
-
-  // 3. Kirim Log Kunjungan ke Database
-  push(logsRef, { 
-    nama: namaUser, 
-    waktu: serverTimestamp(),
-    agent: navigator.userAgent,
-    checksum: "CWU_PRO_SECURE_2026" 
-  });
-
-  // 4. Update Tampilan Realtime (Counter Mata & Love)
-  onValue(statsRef, (snapshot) => {
-    document.getElementById("count").innerText = snapshot.val() || 0;
-  });
-  onValue(likesRef, (snapshot) => {
-    document.getElementById("like-count").innerText = snapshot.val() || 0;
-  });
-
-  // 5. Logika Tombol Like
-  const btnLike = document.getElementById('btn-like');
-  const storageKey = 'cwu_liked_' + namaUser;
-
-  // Cek apakah user sudah pernah like sebelumnya (berdasarkan localStorage)
-  if (localStorage.getItem(storageKey)) {
-      btnLike.style.display = 'none'; 
-  }
-
-  btnLike.onclick = () => {
-    if (!localStorage.getItem(storageKey)) {
-      runTransaction(likesRef, (current) => (current || 0) + 1);
-      localStorage.setItem(storageKey, 'true');
-      btnLike.style.display = 'none'; 
-      
-      push(ref(db, 'logs/likes'), { 
-        nama: namaUser, 
-        waktu: serverTimestamp(),
-        verify_token: "LIKE_CWU_99"
+    if (luckyNumbers.includes(totalViews)) {
+      // TAMPILAN SURPRISE
+      Swal.fire({
+        title: '🎉 SURPRISE! 🎉',
+        html: `Selamat! Kamu adalah pengunjung ke-<b>${totalViews}</b>.<br>Jangan lupa klik <b>Like</b> dan isi testimoninya ya! ❤️`,
+        icon: 'success',
+        background: '#111',
+        color: '#fff',
+        confirmButtonColor: '#d4af37',
+        confirmButtonText: 'SIAP, LAKSANAKAN!', // Tombol dipertegas
+        allowOutsideClick: false
       });
-      alert("Terima kasih atas Like-nya!");
+    } else {
+      // SAMBUTAN BIASA
+      Swal.fire({
+        title: 'Selamat Datang!',
+        text: 'Jangan lupa berikan Like dan pesan terbaikmu untuk developer ya! 😊',
+        icon: 'info',
+        background: '#111',
+        color: '#fff',
+        confirmButtonColor: '#d4af37',
+        confirmButtonText: 'OKE', // Tombol dipertegas
+        
+        timerProgressBar: true
+      });
     }
-  };
-</script>
+  });
 
+  onValue(ref(db, 'stats/total_likes'), (s) => { 
+    likeEl.innerText = s.val() || 0; 
+  });
+
+  if (localStorage.getItem('cwu_liked_' + namaUser)) btnLike.style.display = 'none';
+  
+  btnLike.onclick = () => {
+    runTransaction(ref(db, 'stats/total_likes'), (c) => (c || 0) + 1);
+    localStorage.setItem('cwu_liked_' + namaUser, 'true');
+    btnLike.style.display = 'none';
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Terima kasih likenya!',
+      showConfirmButton: false,
+      timer: 2000,
+      background: '#111',
+      color: '#fff'
+    });
+  };
+
+  // --- DISPLAY LOGIC ---
+  const latestRatingsQuery = query(ref(db, 'ratings'), limitToLast(20));
+
+  onValue(latestRatingsQuery, (snapshot) => {
+    const fragment = document.createDocumentFragment();
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const ratingList = Object.entries(data)
+        .map(([id, val]) => ({ id, ...val }))
+        .filter(item => !item.hidden)
+        .sort((a, b) => (b.pinned || 0) - (a.pinned || 0) || (b.waktu || 0) - (a.waktu || 0));
+      
+      ratingList.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'achievement-container'; 
+        card.style.cssText = `margin-bottom: 15px; position: relative; border-left: 4px solid ${item.pinned ? '#00d2ff' : 'var(--gold)'};`;
+        
+        let stars = "";
+        for(let i=0; i<5; i++) {
+          stars += `<span style="color: ${i < item.rating ? '#FFD700' : '#333'};">★</span>`;
+        }
+
+        let subInfo = item.kategori === "ppi" ? `Anggota PPI (${item.angkatan})` : (item.bidang || "Umum");
+
+        let waktuTeks = "";
+        if (item.waktu) {
+          const d = new Date(item.waktu);
+          const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][d.getDay()];
+          waktuTeks = `${hari}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} - ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`;
+        }
+
+        card.innerHTML = `
+          ${item.pinned ? '<div style="color:#00d2ff; font-size:0.6em; font-weight:bold; margin-bottom:5px;">📌 PINNED</div>' : ''}
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <strong style="color: var(--gold); font-size: 0.9em; display: block;">${item.nama}</strong>
+                <small style="color: var(--blue); font-size: 0.7em;">${subInfo}</small>
+            </div>
+            <div style="font-size: 1em;">${stars}</div>
+          </div>
+          <p style="font-size: 0.85em; margin: 10px 0 20px; color: #eee; line-height: 1.4; font-style: italic;">"${item.pesan}"</p>
+          <div style="position: absolute; bottom: 8px; right: 12px; font-size: 0.6em; color: var(--text-muted); opacity: 0.7;">
+            ${waktuTeks}
+          </div>
+        `;
+        fragment.appendChild(card);
+      });
+
+      requestAnimationFrame(() => {
+        displayContainer.innerHTML = '';
+        displayContainer.appendChild(fragment);
+      });
+    } else {
+      displayContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Belum ada testimoni.</p>';
+    }
+  });
+</script>
   </body>
 </html>
