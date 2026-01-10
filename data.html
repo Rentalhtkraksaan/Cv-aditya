@@ -453,26 +453,30 @@
 
   // --- LOGIC UTAMA ---
 
-  // 1. Auto View Counter dengan Fitur Surprise
+  // 1. INFO SELAMAT DATANG (Muncul setiap kali buka)
+  window.onload = () => {
+    alert("Selamat datang, jangan lupa like yaa!");
+  };
+
+  // 2. Auto View Counter dengan Fitur Surprise (Angka Spesifik)
   runTransaction(statsRef, (currentValue) => {
     return (currentValue || 0) + 1;
   }).then((result) => {
     if (result.committed) {
       const newViewCount = result.snapshot.val();
       
-      // Daftar angka target untuk suprise
+      // Daftar angka target untuk surprise tambahan
       const targets = [1, 10, 50, 100];
       
       if (targets.includes(newViewCount)) {
-        // Delay sedikit 500ms agar angka di layar terupdate dulu baru muncul alert
         setTimeout(() => {
-          alert(`🎁 SURPRISE!\nSelamat! Kamu adalah pengunjung ke-${newViewCount}.\nTerima kasih sudah berkunjung!`);
-        }, 500);
+          alert(`🎁 SURPRISE!\nAnda adalah pengunjung ke-${newViewCount}!\nTerima kasih dukungannya!`);
+        }, 800);
       }
     }
   });
 
-  // 2. Kirim Log Kunjungan
+  // 3. Kirim Log Kunjungan ke Database
   push(logsRef, { 
     nama: namaUser, 
     waktu: serverTimestamp(),
@@ -480,7 +484,7 @@
     checksum: "CWU_PRO_SECURE_2026" 
   });
 
-  // 3. Update Tampilan secara Realtime
+  // 4. Update Tampilan Realtime (Counter Mata & Love)
   onValue(statsRef, (snapshot) => {
     document.getElementById("count").innerText = snapshot.val() || 0;
   });
@@ -488,10 +492,11 @@
     document.getElementById("like-count").innerText = snapshot.val() || 0;
   });
 
-  // 4. Logika Button Like
+  // 5. Logika Tombol Like
   const btnLike = document.getElementById('btn-like');
   const storageKey = 'cwu_liked_' + namaUser;
 
+  // Cek apakah user sudah pernah like sebelumnya (berdasarkan localStorage)
   if (localStorage.getItem(storageKey)) {
       btnLike.style.display = 'none'; 
   }
@@ -507,6 +512,7 @@
         waktu: serverTimestamp(),
         verify_token: "LIKE_CWU_99"
       });
+      alert("Terima kasih atas Like-nya!");
     }
   };
 </script>
