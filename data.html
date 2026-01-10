@@ -353,7 +353,7 @@
           <div class="stat-box">❤️ <span id="like-count">0</span></div>
         </div>
 
-        <button class="like-btn" id="btn-like">Like</button>
+        <button class="like-btn" id="btn-like">❤️ Beri Like</button>
         <div class="developer-info">
           <h2>Informasi Dasar</h2>
           <div class="info-item"><strong>Nama Lengkap</strong><span>Achmad Furqon Aditya Putra</span></div>
@@ -426,7 +426,7 @@
   import { getDatabase, ref, runTransaction, push, serverTimestamp, onValue } 
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // Konfigurasi Project Baru: cwu-ii-3ae88
+  // Konfigurasi Project
   const firebaseConfig = {
     apiKey: "AIzaSyBcQuP2GFUgljflnmhRZEKtB4R8Zr9ye6Y",
     authDomain: "cwu-ii-3ae88.firebaseapp.com",
@@ -442,7 +442,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Ambil Nama dari URL (?user=NamaAnda)
+  // Ambil Nama dari URL
   const params = new URLSearchParams(window.location.search);
   const namaUser = params.get('user') || "Tamu_Anonymous";
 
@@ -451,19 +451,32 @@
   const likesRef = ref(db, 'stats/total_likes');
   const logsRef = ref(db, 'developer_clicks');
 
-  // --- LOGIC KEAMANAN & FITUR ---
+  // --- LOGIC UTAMA ---
 
-  // 1. Auto View Counter (Gunakan Transaction agar akurat)
+  // 1. Auto View Counter dengan Fitur Surprise
   runTransaction(statsRef, (currentValue) => {
     return (currentValue || 0) + 1;
+  }).then((result) => {
+    if (result.committed) {
+      const newViewCount = result.snapshot.val();
+      
+      // Daftar angka target untuk suprise
+      const targets = [1, 10, 50, 100];
+      
+      if (targets.includes(newViewCount)) {
+        // Delay sedikit 500ms agar angka di layar terupdate dulu baru muncul alert
+        setTimeout(() => {
+          alert(`🎁 SURPRISE!\nSelamat! Kamu adalah pengunjung ke-${newViewCount}.\nTerima kasih sudah berkunjung!`);
+        }, 500);
+      }
+    }
   });
 
-  // 2. Kirim Log Kunjungan dengan Hidden Checksum
+  // 2. Kirim Log Kunjungan
   push(logsRef, { 
     nama: namaUser, 
     waktu: serverTimestamp(),
     agent: navigator.userAgent,
-    // Checksum ini gembok rahasia jika nanti Rules di-set ketat
     checksum: "CWU_PRO_SECURE_2026" 
   });
 
@@ -479,23 +492,16 @@
   const btnLike = document.getElementById('btn-like');
   const storageKey = 'cwu_liked_' + namaUser;
 
-  // Cek jika sudah pernah like sebelumnya, langsung sembunyikan tombol
   if (localStorage.getItem(storageKey)) {
       btnLike.style.display = 'none'; 
   }
 
   btnLike.onclick = () => {
     if (!localStorage.getItem(storageKey)) {
-      // Tambah angka like di DB
       runTransaction(likesRef, (current) => (current || 0) + 1);
-      
-      // Simpan di LocalStorage
       localStorage.setItem(storageKey, 'true');
-      
-      // HILANGKAN TOMBOL SETELAH DIKLIK
       btnLike.style.display = 'none'; 
       
-      // Kirim log detail
       push(ref(db, 'logs/likes'), { 
         nama: namaUser, 
         waktu: serverTimestamp(),
