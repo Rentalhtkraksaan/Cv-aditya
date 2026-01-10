@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -307,6 +308,23 @@
     gap: 10px;
     margin-top: 5px;
   }
+  .stats-bar {
+    display: flex; justify-content: center; gap: 15px; margin: 15px 0;
+  }
+  .stat-box {
+    background: rgba(255, 255, 255, 0.05); padding: 5px 15px;
+    border-radius: 50px; border: 1px solid var(--gold);
+    font-size: 0.8em; display: flex; align-items: center; gap: 5px;
+  }
+  .like-btn {
+    background: var(--red); color: white; border: none;
+    padding: 10px 25px; border-radius: 50px; cursor: pointer;
+    font-weight: 600; display: flex; align-items: center; gap: 8px;
+    margin: 10px auto; transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+  }
+  .like-btn:active { transform: scale(0.9); }
+  .like-btn.liked { background: #444; pointer-events: none; opacity: 0.8; }
     </style>
   </head>
   <body>
@@ -320,6 +338,12 @@
           <img src="IMG_20251214_222804.jpg" alt="Achmad Furqon Aditya Putra" class="profile-photo" />
         </div>
         <h1>Biodata Developer</h1>
+        <div class="stats-bar">
+          <div class="stat-box">👁️ <span id="count">0</span></div>
+          <div class="stat-box">❤️ <span id="like-count">0</span></div>
+        </div>
+
+        <button class="like-btn" id="btn-like">❤️ Beri Like</button>
         <div class="developer-info">
           <h2>Informasi Dasar</h2>
           <div class="info-item"><strong>Nama Lengkap</strong><span>Achmad Furqon Aditya Putra</span></div>
@@ -387,7 +411,88 @@
         </div>
       </div>
     </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, runTransaction, push, serverTimestamp, onValue } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+  // Konfigurasi Project Baru: cwu-ii-3ae88
+  const firebaseConfig = {
+    apiKey: "AIzaSyBcQuP2GFUgljflnmhRZEKtB4R8Zr9ye6Y",
+    authDomain: "cwu-ii-3ae88.firebaseapp.com",
+    databaseURL: "https://cwu-ii-3ae88-default-rtdb.firebaseio.com",
+    projectId: "cwu-ii-3ae88",
+    storageBucket: "cwu-ii-3ae88.firebasestorage.app",
+    messagingSenderId: "259906078778",
+    appId: "1:259906078778:web:3e289947bf2e6b27ce0d03",
+    measurementId: "G-VMF1P71R5Z"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Ambil Nama dari URL (?user=NamaAnda)
+  const params = new URLSearchParams(window.location.search);
+  const namaUser = params.get('user') || "Tamu_Anonymous";
+
+  // Definisi Path Database
+  const statsRef = ref(db, 'stats/total_views');
+  const likesRef = ref(db, 'stats/total_likes');
+  const logsRef = ref(db, 'developer_clicks');
+
+  // --- LOGIC KEAMANAN & FITUR ---
+
+  // 1. Auto View Counter (Gunakan Transaction agar akurat)
+  runTransaction(statsRef, (currentValue) => {
+    return (currentValue || 0) + 1;
+  });
+
+  // 2. Kirim Log Kunjungan dengan Hidden Checksum
+  push(logsRef, { 
+    nama: namaUser, 
+    waktu: serverTimestamp(),
+    agent: navigator.userAgent,
+    // Checksum ini gembok rahasia jika nanti Rules di-set ketat
+    checksum: "CWU_PRO_SECURE_2026" 
+  });
+
+  // 3. Update Tampilan secara Realtime
+  onValue(statsRef, (snapshot) => {
+    document.getElementById("count").innerText = snapshot.val() || 0;
+  });
+  onValue(likesRef, (snapshot) => {
+    document.getElementById("like-count").innerText = snapshot.val() || 0;
+  });
+
+  // 4. Logika Button Like
+  const btnLike = document.getElementById('btn-like');
+  const storageKey = 'cwu_liked_' + namaUser;
+
+  if (localStorage.getItem(storageKey)) {
+      btnLike.classList.add('liked');
+      btnLike.innerText = "❤️ Sudah Disukai";
+  }
+
+  btnLike.onclick = () => {
+    if (!localStorage.getItem(storageKey)) {
+      // Tambah angka like di DB
+      runTransaction(likesRef, (current) => (current || 0) + 1);
+      
+      // Simpan di LocalStorage agar tidak bisa like berkali-kali
+      localStorage.setItem(storageKey, 'true');
+      btnLike.classList.add('liked');
+      btnLike.innerText = "❤️ Sudah Disukai";
+      
+      // Kirim log detail yang me-like
+      push(ref(db, 'logs/likes'), { 
+        nama: namaUser, 
+        waktu: serverTimestamp(),
+        verify_token: "LIKE_CWU_99"
+      });
+    }
+  };
+</script>
 
   </body>
 </html>
