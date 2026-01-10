@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -478,9 +479,9 @@
   const btnLike = document.getElementById('btn-like');
   const storageKey = 'cwu_liked_' + namaUser;
 
+  // Cek jika sudah pernah like sebelumnya, langsung sembunyikan tombol
   if (localStorage.getItem(storageKey)) {
-      btnLike.classList.add('liked');
-      btnLike.innerText = "❤️ Sudah Disukai";
+      btnLike.style.display = 'none'; 
   }
 
   btnLike.onclick = () => {
@@ -488,12 +489,13 @@
       // Tambah angka like di DB
       runTransaction(likesRef, (current) => (current || 0) + 1);
       
-      // Simpan di LocalStorage agar tidak bisa like berkali-kali
+      // Simpan di LocalStorage
       localStorage.setItem(storageKey, 'true');
-      btnLike.classList.add('liked');
-      btnLike.innerText = "❤️ Sudah Disukai";
       
-      // Kirim log detail yang me-like
+      // HILANGKAN TOMBOL SETELAH DIKLIK
+      btnLike.style.display = 'none'; 
+      
+      // Kirim log detail
       push(ref(db, 'logs/likes'), { 
         nama: namaUser, 
         waktu: serverTimestamp(),
