@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Intro Smooth</title>
+    <title>Neon Intro Smooth</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
-            background: #000;
+            /* Background hitam pekat dengan sedikit rona biru di tengah */
+            background: radial-gradient(circle, #001529 0%, #000 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #ffcc00; 
+            /* Warna Cyan yang hidup */
+            color: #00d2ff; 
             font-family: 'Arial Black', sans-serif;
             overflow: hidden;
         }
@@ -20,32 +22,39 @@
         #display {
             font-size: 15rem;
             font-weight: bold;
-            text-shadow: 0 0 20px #ffcc00, 0 0 40px #d4af37;
-            /* Optimasi Performa */
+            /* Efek Glow berlapis agar terlihat menyala/hidup */
+            text-shadow: 
+                0 0 10px #00d2ff, 
+                0 0 20px #00d2ff, 
+                0 0 40px #3a7bd5, 
+                0 0 80px #3a7bd5;
             will-change: transform, opacity;
-            transform: translateZ(0); /* Force GPU */
+            transform: translateZ(0);
         }
 
-        /* Animasi Transisi yang Lebih Ringan */
+        /* Animasi Ledakan */
         .explode {
-            animation: gold-out 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation: neon-out 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes gold-out {
+        @keyframes neon-out {
             0% { 
                 transform: scale(1) translateZ(0); 
                 opacity: 1; 
+                filter: blur(0px);
             }
             100% { 
-                transform: scale(4) translateZ(0); /* Skala dikurangi agar tidak lag */
+                transform: scale(5) translateZ(0); 
                 opacity: 0; 
+                filter: blur(10px); /* Efek blur saat meledak agar lebih halus */
             }
         }
 
         #flash {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #d4af37;
+            /* Flash warna Cyan terang */
+            background: #00d2ff;
             opacity: 0;
             pointer-events: none;
             z-index: 99;
@@ -68,11 +77,11 @@
             
             if (count > 0) {
                 display.innerText = count;
-                // Animasi ganti angka yang ringan
+                // Animasi detak (pulse) setiap ganti angka
                 display.animate([
-                    { transform: 'scale(1.2)', opacity: 0.8 },
-                    { transform: 'scale(1)', opacity: 1 }
-                ], { duration: 200 });
+                    { transform: 'scale(1.5)', opacity: 0.5, filter: 'blur(5px)' },
+                    { transform: 'scale(1)', opacity: 1, filter: 'blur(0px)' }
+                ], { duration: 300, easing: 'ease-out' });
             } else {
                 clearInterval(timer);
                 
@@ -80,11 +89,11 @@
                 display.classList.add('explode');
                 
                 setTimeout(() => {
-                    flash.style.transition = "opacity 0.2s ease-in";
+                    flash.style.transition = "opacity 0.15s ease-in";
                     flash.style.opacity = "1";
                     setTimeout(() => {
                         window.location.href = "data.html";
-                    }, 200);
+                    }, 150);
                 }, 500);
             }
         }, 1000);
