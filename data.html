@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -482,11 +483,11 @@
         </div>
       </div>
     </div>
-<script type="module">
+    <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { 
-    getDatabase, ref, runTransaction, onValue, query, limitToLast 
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+     getDatabase, ref, runTransaction, onValue, query, limitToLast 
+   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBcQuP2GFUgljflnmhRZEKtB4R8Zr9ye6Y",
@@ -511,8 +512,7 @@
   const namaUser = params.get('user') || "Tamu_Anonymous";
 
   // --- LOGIKA STATS & SURPRISE ---
-  const statsRef = ref(db, 'stats/total_views');
-  
+  const statsRef = ref(db, 'stats/total_views');    
   runTransaction(statsRef, (curr) => (curr || 0) + 1).then((result) => {
     const totalViews = result.snapshot.val();
     countEl.innerText = totalViews;
@@ -520,7 +520,6 @@
     const luckyNumbers = [1, 10, 50, 100, 200, 300, 400, 500];
 
     if (luckyNumbers.includes(totalViews)) {
-      // TAMPILAN SURPRISE
       Swal.fire({
         title: '🎉 SURPRISE! 🎉',
         html: `Selamat! Kamu adalah pengunjung ke-<b>${totalViews}</b>.<br>Jangan lupa klik <b>Like</b> dan isi testimoninya ya! ❤️`,
@@ -528,11 +527,10 @@
         background: '#111',
         color: '#fff',
         confirmButtonColor: '#d4af37',
-        confirmButtonText: 'SIAP, LAKSANAKAN!', // Tombol dipertegas
+        confirmButtonText: 'SIAP, LAKSANAKAN!',
         allowOutsideClick: false
       });
     } else {
-      // SAMBUTAN BIASA
       Swal.fire({
         title: 'Selamat Datang!',
         text: 'Jangan lupa berikan Like dan pesan terbaikmu untuk developer ya! 😊',
@@ -540,19 +538,17 @@
         background: '#111',
         color: '#fff',
         confirmButtonColor: '#d4af37',
-        confirmButtonText: 'OKE', // Tombol dipertegas
-        
+        confirmButtonText: 'OKE',
         timerProgressBar: true
       });
     }
   });
 
   onValue(ref(db, 'stats/total_likes'), (s) => { 
-    likeEl.innerText = s.val() || 0; 
-  });
+     likeEl.innerText = s.val() || 0; 
+   });
 
-  if (localStorage.getItem('cwu_liked_' + namaUser)) btnLike.style.display = 'none';
-  
+  if (localStorage.getItem('cwu_liked_' + namaUser)) btnLike.style.display = 'none';    
   btnLike.onclick = () => {
     runTransaction(ref(db, 'stats/total_likes'), (c) => (c || 0) + 1);
     localStorage.setItem('cwu_liked_' + namaUser, 'true');
@@ -592,7 +588,12 @@
           stars += `<span style="color: ${i < item.rating ? '#FFD700' : '#333'};">★</span>`;
         }
 
-        let subInfo = item.kategori === "ppi" ? `Anggota PPI (${item.angkatan})` : (item.bidang || "Umum");
+        // --- PERBAIKAN LOGIKA DISINI ---
+        // Jika PPI: Munculkan Anggota PPI (Tahun) - Bidang
+        // Jika Umum: Munculkan Bidang saja
+        let subInfo = item.kategori === "ppi" 
+            ? `Anggota PPI (${item.angkatan}) • ${item.bidang}` 
+            : (item.bidang || "Umum");
 
         let waktuTeks = "";
         if (item.waktu) {
