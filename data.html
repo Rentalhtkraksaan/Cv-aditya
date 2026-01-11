@@ -1,3 +1,8 @@
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -522,7 +527,7 @@
         </div>
       </div>
     </div>
-    <script type="module">
+   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { 
       getDatabase, ref, runTransaction, onValue, query, limitToLast 
@@ -553,65 +558,60 @@
   const params = new URLSearchParams(window.location.search);
   const namaUser = params.get('user') || "Tamu_Anonymous";
 
-  // --- LOGIKA STATS (VIEWS) ---
-  const statsRef = ref(db, 'stats/total_views');      
-  runTransaction(statsRef, (curr) => (curr || 0) + 1).then((result) => {
-    const totalViews = result.snapshot.val();
-    if(countEl) countEl.innerText = totalViews;
+  // --- 1. LOGIKA VIEWS (REAL-TIME) ---
+  const statsRef = ref(db, 'stats/total_views');
 
-    const luckyNumbers = [1, 10, 50, 100, 200, 300, 400, 500];
-    if (luckyNumbers.includes(totalViews)) {
-      Swal.fire({
-        title: '🎉 SURPRISE! 🎉',
-        html: `Selamat! Kamu adalah pengunjung ke-<b>${totalViews}</b>.<br>Jangan lupa klik <b>Like</b> dan isi testimoninya ya! ❤️`,
-        icon: 'success',
-        background: '#111',
-        color: '#fff',
-        confirmButtonColor: '#d4af37',
-        confirmButtonText: 'SIAP, LAKSANAKAN!',
-        allowOutsideClick: false
-      });
-    }
+  onValue(statsRef, (snapshot) => {
+    if (countEl) countEl.innerText = snapshot.val() || 0;
   });
 
-  // --- LOGIKA LIKES ---
-  onValue(ref(db, 'stats/total_likes'), (s) => {
+  runTransaction(statsRef, (curr) => (curr || 0) + 1);
+
+  // --- 2. LOGIKA LIKES (REAL-TIME & HILANGKAN TOMBOL) ---
+  const likeRef = ref(db, 'stats/total_likes');
+
+  onValue(likeRef, (s) => {
       if(likeEl) likeEl.innerText = s.val() || 0;
   });
 
-  if (localStorage.getItem('cwu_liked_' + namaUser)) btnLike.style.display = 'none';      
-  btnLike.onclick = () => {
-    runTransaction(ref(db, 'stats/total_likes'), (c) => (c || 0) + 1);
-    localStorage.setItem('cwu_liked_' + namaUser, 'true');
-    btnLike.style.display = 'none';
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title: 'Terima kasih likenya!',
-      showConfirmButton: false,
-      timer: 2000,
-      background: '#111',
-      color: '#fff'
-    });
-  };
+  // CEK APAKAH SUDAH LIKE: JIKA YA, LANGSUNG HAPUS TOMBOL DARI TAMPILAN
+  if (localStorage.getItem('cwu_liked_' + namaUser)) {
+    if (btnLike) btnLike.style.display = 'none';
+  }
 
-  // --- LOGIKA DISPLAY & KALKULASI RATING ---
+  if (btnLike) {
+    btnLike.onclick = () => {
+      runTransaction(likeRef, (c) => (c || 0) + 1);
+      localStorage.setItem('cwu_liked_' + namaUser, 'true');
+      
+      // EFEK HILANG SEKETIKA SETELAH KLIK
+      btnLike.style.display = 'none';
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'Terima kasih likenya!',
+        showConfirmButton: false,
+        timer: 2000,
+        background: '#111', color: '#fff'
+      });
+    };
+  }
+
+  // --- 3. LOGIKA RATING & TESTIMONI (REAL-TIME) ---
   onValue(ref(db, 'ratings'), (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
       const allEntries = Object.entries(data).map(([id, val]) => ({ id, ...val }));
       
-      // 1. Hitung Total Ulasan & Rata-rata Rating Keseluruhan
       const totalUlasan = allEntries.length;
       const totalStars = allEntries.reduce((acc, item) => acc + (item.rating || 0), 0);
       const averageRating = (totalStars / totalUlasan).toFixed(1);
 
-      // Update Tampilan Stats
       if(ulasanEl) ulasanEl.innerText = totalUlasan;
       if(avgEl) avgEl.innerText = averageRating;
 
-      // 2. Filter & Sortir untuk List Tampilan (Limit 20 Terbaru)
       const ratingList = allEntries
         .filter(item => !item.hidden)
         .sort((a, b) => (b.pinned || 0) - (a.pinned || 0) || (b.waktu || 0) - (a.waktu || 0))
@@ -628,7 +628,6 @@
           starsStr += `<span style="color: ${i < item.rating ? '#FFD700' : '#333'};">★</span>`;
         }
 
-        // Tampilan SubInfo: PPI (Tahun) • Bidang
         let subInfo = item.kategori === "ppi" 
             ? `Anggota PPI (${item.angkatan}) • ${item.bidang}` 
             : (item.bidang || "Umum");
