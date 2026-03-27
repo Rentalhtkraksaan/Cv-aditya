@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Berikan Rating - Aditya Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --bg-color: #000c18;
@@ -33,26 +32,33 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(0, 210, 255, 0.1) 0%, transparent 60%);
-            padding: 40px 20px;
+            background-image: radial-gradient(circle at 50% 0%, rgba(0, 210, 255, 0.1) 0%, transparent 60%);
+            padding: 80px 20px 40px; /* Padding top ditambah untuk ruang tombol */
         }
 
+        /* PERBAIKAN TOMBOL KEMBALI */
         .back-btn {
-            position: absolute;
-            top: 30px;
-            left: 30px;
+            position: fixed; /* Diubah ke fixed agar selalu di depan */
+            top: 25px;
+            left: 25px;
+            z-index: 100; /* Memastikan di atas elemen lain */
             color: var(--text-main);
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 10px;
             font-weight: 500;
-            transition: color 0.3s, transform 0.3s;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
         .back-btn:hover {
             color: var(--primary-color);
+            background: rgba(0, 210, 255, 0.1);
             transform: translateX(-5px);
         }
 
@@ -245,10 +251,26 @@
             color: #000;
         }
 
+        /* RESPONSIVE MOBILE */
         @media (max-width: 600px) {
+            body {
+                align-items: flex-start; /* Card tidak di tengah vertikal agar mudah di-scroll */
+                padding-top: 90px;
+            }
             .form-row {
                 flex-direction: column;
                 gap: 0;
+            }
+            .back-btn {
+                top: 15px;
+                left: 15px;
+                font-size: 0.9rem;
+            }
+            .rating-card {
+                padding: 25px 20px;
+            }
+            .stars label {
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -288,7 +310,7 @@
                 </div>
                 <div class="feedback-group">
                     <label for="reviewerRole">Jabatan / Instansi</label>
-                    <input type="text" id="reviewerRole" placeholder="Contoh: Klien / Partner Bisnis" required>
+                    <input type="text" id="reviewerRole" placeholder="Contoh: Klien" required>
                 </div>
             </div>
 
@@ -303,16 +325,14 @@
         <div class="success-overlay" id="successOverlay">
             <i class="fas fa-check-circle success-icon"></i>
             <h3>Berhasil Ditambahkan!</h3>
-            <p>Ulasan Anda telah tersimpan dan sudah ditayangkan di halaman portofolio utama.</p>
+            <p>Ulasan Anda telah tersimpan di sistem.</p>
             <a href="data.html#reviews" class="btn-home">Kembali ke Portofolio</a>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { 
-            getDatabase, ref, push, set 
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBcQuP2GFUgljflnmhRZEKtB4R8Zr9ye6Y",
@@ -334,28 +354,21 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const ratingSelected = document.querySelector('input[name="rating"]:checked');
             
             if (!ratingSelected) {
-                alert('Silakan pilih jumlah bintang terlebih dahulu!');
+                alert('Silakan pilih jumlah bintang!');
                 return;
             }
 
-            const ratingVal = parseInt(ratingSelected.value);
-            const rName = document.getElementById('reviewerName').value;
-            const rRole = document.getElementById('reviewerRole').value;
-            const rMsg = document.getElementById('feedbackMsg').value;
-
             submitBtn.textContent = 'Memproses...';
-            submitBtn.style.opacity = '0.7';
             submitBtn.disabled = true;
 
             const newReview = {
-                nama: rName,
-                bidang: rRole,
-                rating: ratingVal,
-                pesan: rMsg,
+                nama: document.getElementById('reviewerName').value,
+                bidang: document.getElementById('reviewerRole').value,
+                rating: parseInt(ratingSelected.value),
+                pesan: document.getElementById('feedbackMsg').value,
                 waktu: Date.now(),
                 kategori: "umum",
                 hidden: false,
@@ -368,9 +381,8 @@
                 overlay.classList.add('active');
             } catch (error) {
                 console.error(error);
-                alert("Gagal menambahkan ulasan.");
+                alert("Gagal mengirim ulasan.");
                 submitBtn.textContent = 'Kirim Publik';
-                submitBtn.style.opacity = '1';
                 submitBtn.disabled = false;
             }
         });
